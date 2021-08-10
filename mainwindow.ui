@@ -17,8 +17,8 @@
    <widget class="QPushButton" name="pushButton">
     <property name="geometry">
      <rect>
-      <x>60</x>
-      <y>50</y>
+      <x>70</x>
+      <y>130</y>
       <width>81</width>
       <height>41</height>
      </rect>
@@ -30,14 +30,14 @@
      </font>
     </property>
     <property name="text">
-     <string>BOTON</string>
+     <string>ON</string>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton_2">
     <property name="geometry">
      <rect>
-      <x>240</x>
-      <y>50</y>
+      <x>290</x>
+      <y>110</y>
       <width>121</width>
       <height>71</height>
      </rect>
@@ -49,6 +49,29 @@
     </property>
     <property name="text">
      <string>Boton1</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEdit">
+    <property name="geometry">
+     <rect>
+      <x>80</x>
+      <y>20</y>
+      <width>221</width>
+      <height>21</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLCDNumber" name="lcdNumber">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>50</y>
+      <width>171</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="digitCount">
+     <number>4</number>
     </property>
    </widget>
   </widget>
