@@ -3,6 +3,9 @@
 
 #include <QMainWindow>
 #include <QTimer>
+#include <qpaintbox.h>
+#include <QDateTime>
+#include <math.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -28,6 +31,7 @@ private:
     int counter;
 
     QTimer *QTimer1;
+    QPaintBox *QPaintBox1;
 
 
 };
