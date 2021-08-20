@@ -6,10 +6,11 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    counter=0;
+    aux=0;
     QTimer1 = new QTimer(this);
     connect(QTimer1, &QTimer::timeout, this, &MainWindow::onQTimer1);
     QPaintBox1 = new QPaintBox(0, 0, ui->widget);
+
 }
 
 MainWindow::~MainWindow()
@@ -19,98 +20,157 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-
-void MainWindow::onQTimer1(){
-    QDateTime dt;
+void MainWindow::drawClock(int hour, int minutes, int seconds, int mSecs, int simple){
     float aRad;
-    int hour, minutes, seconds, mSecs, xi, xf, yi, yf, w, h, radius;
-    int aux1, aux2;
-
+    int xi, xf, yi, yf, centerX, centerY, diameter, dotDiameter, hourL, minuteL, secondsL, hourLB, minuteLB, secondsLB;
     QPen pen;
     QBrush brush;
     QPainter paint(QPaintBox1->getCanvas());
 
-    counter++;
-    if(counter==100)
-        counter=0;
+//Tamaños del reloj:
+    centerX = 206; //(QPaintBox1->width()/2);
+    centerY = 206; //(QPaintBox1->height()/2);
+    diameter = QPaintBox1->width()-10;
+//Elijo el estilo del reloj:
+    if(simple){
+    //Largo de las agujas:
+        secondsL = 190;
+        secondsLB = 165;
+        minuteL = 155;
+        minuteLB = 0;
+        hourL = 115;
+        hourLB = 0;
+    //Contorno y fondo del reloj:
+        pen.setWidth(0);
+        pen.setColor(QColorConstants::Black);
+        brush.setColor(QColorConstants::Black);
+    }else{
+    //Largo de las agujas:
+        secondsL = 190;
+        secondsLB = -20;
+        minuteL = 155;
+        minuteLB = 20;
+        hourL = 115;
+        hourLB = 20;
+    //Diámetro del punto central:
+        dotDiameter = 5;
+    //Contorno y fondo del reloj:
+        pen.setWidth(5);
+        pen.setColor(QColorConstants::Yellow);
+        brush.setColor(QColorConstants::DarkGray);
+    }
 
-    ui->lcdNumber->display(QString("%1").arg(counter, 4, 10, QChar('0')));
-    ui->lineEdit->setText(dt.currentDateTime().toString("hh:mm:ss.zzz-dd/MM/yyyy"));
+//Contorno y fondo del reloj:
+        brush.setStyle(Qt::SolidPattern);
+        paint.setPen(pen);
+        paint.setBrush(brush);
+        paint.drawEllipse(5, 5, diameter, diameter);
+
+
+
+//Líneas del Reloj:
+    if(simple){
+        pen.setWidth(4);
+        pen.setColor(QColorConstants::Cyan);
+    }else{
+        pen.setWidth(3);
+        pen.setColor(QColorConstants::White);
+    }
+    paint.setPen(pen);
+    for(int i= 0; i<360; i+=6){
+        aRad = i*M_PI/180;
+        if(!(i%30)){
+            xi = centerX+175*cos(aRad);
+            yi = centerY-175*sin(aRad);
+        }else{
+            xi = centerX+185*cos(aRad);
+            yi = centerY-185*sin(aRad);
+        }
+        xf = centerX+190*cos(aRad);
+        yf = centerY-190*sin(aRad);
+        paint.drawLine(xi, yi, xf, yf);
+    }
+//Segundos:
+    aRad = (90-(6*seconds+0.006*mSecs))*M_PI/180;
+        xf = centerX+secondsL*cos(aRad);
+        yf = centerY-secondsL*sin(aRad);
+        xi = centerX+secondsLB*cos(aRad);
+        yi = centerY-secondsLB*sin(aRad);
+        if(simple){
+            pen.setColor(QColorConstants::Red);
+            pen.setWidth(5);
+        }else{
+            pen.setColor(QColorConstants::DarkRed);
+            pen.setWidth(4);
+        }
+        paint.setPen(pen);
+        paint.drawLine(xi, yi, xf, yf);
+//Minutos:
+        aRad = (90-(6*minutes+0.1*seconds))*M_PI/180;
+        xf = centerX+minuteL*cos(aRad);
+        yf = centerY-minuteL*sin(aRad);
+        if(simple){
+            pen.setColor(QColorConstants::Cyan);
+        }else{
+            pen.setColor(QColorConstants::Yellow);
+        }
+        xi = centerX-minuteLB*cos(aRad);
+        yi = centerY+minuteLB*sin(aRad);
+
+        pen.setWidth(4);
+        paint.setPen(pen);
+        paint.drawLine(xi, yi, xf, yf);
+//Hora:
+            aRad = (90-(30*hour)-0.5*minutes)*M_PI/180;
+            xf = centerX+hourL*cos(aRad);
+            yf = centerY-hourL*sin(aRad);
+            if(simple){
+                pen.setColor(QColorConstants::Cyan);
+                pen.setWidth(6);
+            }else{
+                pen.setColor(QColorConstants::Yellow);
+                pen.setWidth(4);
+            }
+            xi = centerX-hourLB*cos(aRad);
+            yi = centerY+hourLB*sin(aRad);
+            paint.setPen(pen);
+            paint.drawLine(xi, yi, xf, yf);
+
+
+//Punto central
+        if(!simple){
+            pen.setColor(QColorConstants::Black);
+            pen.setWidth(2);
+            paint.setPen(pen);
+            brush.setColor(QColorConstants::Black);
+            brush.setStyle(Qt::SolidPattern);
+            paint.setBrush(brush);
+            paint.drawEllipse(centerX-3, centerY-3, dotDiameter, dotDiameter);
+        }
+
+    QPaintBox1->update();
+    qDebug("%i, %i, %i", centerX, centerY, simple);
+}
+
+
+void MainWindow::onQTimer1(){
+    QDateTime dt;
+    int hour, minutes, seconds, mSecs;
 
     hour = dt.currentDateTime().time().hour();
     minutes = dt.currentDateTime().time().minute();
     seconds = dt.currentDateTime().time().second();
     mSecs = dt.currentDateTime().time().msec();
 
-    pen.setWidth(5);
-    pen.setColor(Qt::yellow);
-    paint.setPen(pen);
-    brush.setColor(Qt::darkGray);
-    brush.setStyle(Qt::SolidPattern);
-    paint.setBrush(brush);
-    paint.drawEllipse(5, 5, 401, 401);
+    ui->lineEdit->setText(dt.currentDateTime().toString("hh:mm:ss.zzz - dd/MM/yyyy"));
 
-    pen.setColor(Qt::white);
-    pen.setWidth(3);
-    paint.setPen(pen);
-    for(int i= 0; i<360; i+=6){
-        aRad = i*M_PI/180;
-        if(!(i%30)){
-            xi = 206+175*cos(aRad);
-            yi = 206-175*sin(aRad);
-        }else{
-            xi = 206+185*cos(aRad);
-            yi = 206-185*sin(aRad);
-        }
-        xf = 206+190*cos(aRad);
-        yf = 206-190*sin(aRad);
-        paint.drawLine(xi, yi, xf, yf);
-    }
+    if(mSecs<500)
+        ui->lcdNumber->display(dt.currentDateTime().toString("hh:mm"));
+    else
+        ui->lcdNumber->display(dt.currentDateTime().toString("hh mm"));
 
-    aRad = (90-(6*seconds+0.006*mSecs))*M_PI/180;
-        xf = 206+196*cos(aRad);
-        yf = 206-196*sin(aRad);
-        aux1 = 206+170*cos(aRad);
-        aux2 = 206-170*sin(aRad);
-        pen.setColor(Qt::darkRed);
-        pen.setWidth(5);
-        paint.setPen(pen);
-        paint.drawLine(aux1, aux2, xf, yf);
 
-        aRad = (90-(6*minutes+0.1*seconds))*M_PI/180;
-        xf = 206+155*cos(aRad);
-        yf = 206-155*sin(aRad);
-        aux1 = 206-20*cos(aRad);
-        aux2 = 206+20*sin(aRad);
-        pen.setColor(Qt::yellow);
-        pen.setWidth(4);
-        paint.setPen(pen);
-        paint.drawLine(aux1, aux2, xf, yf);
-
-        if(hour <12){
-            hour -= 12;
-            aRad = (90-(30*hour)+0.5*minutes)*M_PI/180;
-        }else{
-            aRad = (90-(30*hour)-0.5*minutes)*M_PI/180;
-        }
-        xf = 206+115*cos(aRad);
-        yf = 206-115*sin(aRad);
-        aux1 = 206-20*cos(aRad);
-        aux2 = 206+20*sin(aRad);
-        pen.setColor(Qt::yellow);
-        pen.setWidth(4);
-        paint.setPen(pen);
-        paint.drawLine(aux1, aux2, xf, yf);
-
-        pen.setColor(Qt::black);
-        pen.setWidth(2);
-        paint.setPen(pen);
-        brush.setColor(Qt::black);
-        brush.setStyle(Qt::SolidPattern);
-        paint.setBrush(brush);
-        paint.drawEllipse(203, 203, 5, 5);
-
-    QPaintBox1->update();
+    drawClock(hour, minutes, seconds, mSecs, simple);
 }
 
 void MainWindow::on_pushButton_clicked()
@@ -119,7 +179,7 @@ void MainWindow::on_pushButton_clicked()
         QTimer1->stop();
         ui->pushButton->setText("ON");
     }else{
-        QTimer1->start(100);
+        QTimer1->start(16);
         ui->pushButton->setText("OFF");
     }
 }
@@ -140,6 +200,11 @@ void MainWindow::on_pushButton_2_clicked()
 //    paint.drawEllipse(w/2-radius, h/2-radius, 2*radius, 2*radius);
     QPaintBox1->getCanvas()->fill(Qt::black);
     QPaintBox1->update();
+    if(simple!=1){
+        simple=1;
+    }else{
+        simple=0;
+    }
 }
 
 
